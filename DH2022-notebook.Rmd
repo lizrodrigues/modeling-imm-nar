@@ -2,14 +2,15 @@
 title: "DH 2022 Notebook"
 output: html_notebook
 ---
+## Project
 
-This notebook documents my process in modeling selected early twentieth century immigrant autobiographies using Syuzhet.
+This notebook documents my exploratory analysis of several early twentieth-century US immigrant autobiographical narratives using the Syuzhet package to model narrative shape on an affective basis.
 
 ## Get First Text
 
 - Set working directory
 ```{r}
-setwd("/Users/rodrigue8/Documents/research/conferences/2022-DH")
+setwd("/Users/rodrigue8/Documents/GitHub/modeling-imm-nar")
 ```
 
 - load Syuzhet
@@ -22,7 +23,7 @@ library(syuzhet)
 - Load Antin text.
 
 ```{r}
-antin_text <- get_text_as_string("corpus/Antin22.txt")
+antin_text <- get_text_as_string("Antin22.txt")
 ```
 
 - Use Syuzhet's sentence parser to create a sentence vector. Length: 5695.
@@ -43,7 +44,7 @@ I ran default syuzhet lexicon first to try it out. I created a data frame to qui
 
 ```{r}
 antin_no_gloss_sentence_scores_sy <- get_sentiment(antin_no_gloss_sentences, method="syuzhet")
-antin_compare_sy_sent <- cbind(antin_no_gloss_sentences, antin_no_gloss_sentence_scores_sy)
+antin_compare_sy_sent <- data.frame(antin_no_gloss_sentence_scores_sy, antin_no_gloss_sentences)
 ```
 
 
@@ -63,7 +64,11 @@ I paused here to plot all four, unscaled. Basic shapes in agreement.
 I then used simple_plot to compare different smoothing methods for Syuzhet lexicon scores.
 
 ```{r}
-simple_plot(antin_no_gloss_sentence_scores_sy)
+plot(antin_no_gloss_sentence_scores_sy, type= "l", col = "blue")
+simple_plot(antin_no_gloss_sentence_scores_sy, title = "Antin Syuzhet Lexicon Plot",
+  legend_pos = "top",
+  lps = 10,
+  window = 0.1)
 ```
 
 I then proceeded to do the same using VADER. This produced a warning message, but it did not appear to affect results. I got the expected number of "observations" ie sentence scores.
@@ -81,7 +86,50 @@ plot(antin_vader_vec, type="l", main="Antin Sentiment Using Vader", xlab="Narrat
 simple_plot(antin_vader_vec)
 ```
 
-## Modeling a second text
+Isolating from the simple_plot function a function to plot only rolling mean visualization for middle reading as demonstrated by Elkins & Chun:
+
+```{r}
+rolling_plot <- function (raw_values, title = "Syuzhet Plot", legend_pos = "top", lps=10, window = 0.1){
+  wdw <- round(length(raw_values) * window)
+  rolled <- rescale(zoo::rollmean(raw_values, k = wdw, fill = 0))
+  half <- round(wdw/2)
+  rolled[1:half] <- NA
+  end <- length(rolled) - half
+  rolled[end:length(rolled)] <- NA
+  graphics::plot(rolled, type = "l", ylim = c(-1, 1), main = title, xlab = "Full Narrative Time", ylab = "Scaled Sentiment", col="blue", lty = 2)
+  abline(h=0)
+}
+rolling_plot(antin_no_gloss_sentence_scores_sy, title = "Antin Rolling Mean")
+
+```
+
+Also plotting get percentage values, as Hoyeol Kim suggests.
+
+```{r}
+antin_per_val <- get_percentage_values(antin_no_gloss_sentence_scores_sy, bins = 100)
+#adding this to easily browse results
+antin_compare_per_val <- cbind(antin_per_val)
+plot(antin_per_val, type="l", 
+  main="Antin Percentage Values", 
+  xlab = "Narrative Time", 
+  ylab= "Emotional Valence",
+  col = "red")
+abline(h=0)
+```
+
+With default settings, these tools seem to contradict each other: percentage values seems to spend more time in positive territory while rolling mean suggests more time in negative. 
+
+Taking a look at summary:
+
+```{r}
+mean(antin_no_gloss_sentence_scores_sy)
+summary(antin_no_gloss_sentence_scores_sy)
+mean(antin_per_val)
+summary(antin_per_val)
+```
+
+
+## Modeling additional texts
 
 ### Bok
 
@@ -90,7 +138,7 @@ I thought I was going to do Steiner next, but the process of cleaning up the OCR
 Load Bok
 
 ```{r}
-bok_text <- get_text_as_string("corpus/bok22.txt")
+bok_text <- get_text_as_string("bok22.txt")
 ```
 
 Parse into sentences, get syuzhet scores, simple plot.
@@ -99,26 +147,53 @@ Parse into sentences, get syuzhet scores, simple plot.
 bok_sentences <- get_sentences(bok_text)
 bok_sentence_scores_sy <- get_sentiment(bok_sentences, method="syuzhet")
 bok_compare_sy_sent <- cbind(bok_sentences, bok_sentence_scores_sy)
-simple_plot(bok_sentence_scores_sy)
+simple_plot(bok_sentence_scores_sy, title = "Bok Syuzhet Lexicon Plot",
+  legend_pos = "top",
+  lps = 10,)
 ```
 
 Let's speed this up and do the rest in single chunks.
 
 ### Riis
 ```{r}
-riis_text <- get_text_as_string("corpus/riis22.txt")
+riis_text <- get_text_as_string("riis22.txt")
 riis_sentences <- get_sentences(riis_text)
 riis_sentence_scores_sy <- get_sentiment(riis_sentences, method="syuzhet")
 riis_compare_sy_sent <- cbind(riis_sentences, riis_sentence_scores_sy)
-simple_plot(riis_sentence_scores_sy)
+simple_plot(riis_sentence_scores_sy, title = "Riis Syuzhet Lexicon Plot",
+  legend_pos = "top",
+  lps = 10,)
 ```
 ### Pupin
 
 ```{r}
-pupin_text <- get_text_as_string("corpus/pupin22.txt")
+pupin_text <- get_text_as_string("pupin22.txt")
 pupin_sentences <- get_sentences(pupin_text)
 pupin_sentence_scores_sy <- get_sentiment(pupin_sentences, method="syuzhet")
 pupin_compare_sy_sent <- cbind(pupin_sentences, pupin_sentence_scores_sy)
-simple_plot(pupin_sentence_scores_sy)
+simple_plot(pupin_sentence_scores_sy, title = "Pupin Syuzhet Lexicon Plot",
+  legend_pos = "top",
+  lps = 10,)
 ```
+
+
+## Scraps
+
+This doesn't work yet, but I want a way to look at all the different values generated for the rolling mean.
+
+
+```{r}
+compare_rolling <- function (raw_values, window = 0.1) {
+  wdw <- round(length(raw_values) * window)
+  rolled <- rescale(zoo::rollmean(raw_values, k = wdw, fill = 0))
+  #half <- round(wdw/2)
+  #rolled[1:half] <- NA
+  #end <- length(rolled) - half
+  #rolled[end:length(rolled)] <- NA
+  data.frame(rolled)
+}
+
+antin_rolling_compare <- compare_rolling(antin_no_gloss_sentence_scores_sy)
+```
+
 
