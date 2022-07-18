@@ -59,7 +59,8 @@ antin_no_gloss_sentence_scores_bing <- get_sentiment(antin_no_gloss_sentences, m
 antin_no_gloss_sentence_scores_nrc <- get_sentiment(antin_no_gloss_sentences, method="nrc", lang="english")
 ```
 
-I paused here to plot all four, unscaled. Basic shapes in agreement. 
+I paused here to plot all four, unscaled, using percentage value. Basic shapes in agreement. 
+
 
 I then used simple_plot to compare different smoothing methods for Syuzhet lexicon scores.
 
@@ -196,4 +197,11 @@ compare_rolling <- function (raw_values, window = 0.1) {
 antin_rolling_compare <- compare_rolling(antin_no_gloss_sentence_scores_sy)
 ```
 
+I also want a way to plot all four lexicons using rolling mean on the same plot, which also doesn't work yet:
 
+```{r}
+rolling_plot(antin_no_gloss_sentence_scores_sy)
+line(antin_no_gloss_sentence_scores_afinn)
+line(antin_no_gloss_sentence_scores_bing)
+line(antin_no_gloss_sentence_scores_nrc)
+```

@@ -1,0 +1,51 @@
+---
+title: "Close Validation"
+output: html_notebook
+---
+
+I am going to plot the rolling mean of the Syuzhet lexicon for Antin and then use vertical lines to identify high and low points.
+
+This block gets up to having sentiment scores ready to plot:
+
+```{r}
+library(syuzhet)
+antin_text <- get_text_as_string("Antin22.txt")
+antin_sentences <- get_sentences(antin_text)
+antin_no_gloss_sentences <- antin_sentences[1:5421]
+antin_no_gloss_sentence_scores_sy <- get_sentiment(antin_no_gloss_sentences, method="syuzhet")
+antin_compare_sy_sent <- data.frame(antin_no_gloss_sentence_scores_sy, antin_no_gloss_sentences)
+```
+
+Now I am going to plot rolling mean and experiment with the correct vertical lines:
+
+```{r}
+rolling_plot <- function (raw_values, title = "Syuzhet Plot", legend_pos = "top", lps=10, window = 0.1){
+  wdw <- round(length(raw_values) * window)
+  rolled <- rescale(zoo::rollmean(raw_values, k = wdw, fill = 0))
+  half <- round(wdw/2)
+  rolled[1:half] <- NA
+  end <- length(rolled) - half
+  rolled[end:length(rolled)] <- NA
+  graphics::plot(rolled, type = "l", ylim = c(-1, 1), main = title, xlab = "Full Narrative Time", ylab = "Scaled Sentiment", col="blue", lty = 2)
+  abline(h=0)
+  abline(v=780)
+  abline(v=890)
+  abline(v=2030)
+  abline(v=3200)
+  abline(v=4450)
+  abline(v=4600)
+  abline(v=5110)
+}
+rolling_plot(antin_no_gloss_sentence_scores_sy, title = "Antin Rolling Mean")
+```
+
+Now I am going to identify the text windows (~ten sentences on each side) corresponding to these rolling mean peaks and valleys and see 1) if they are accurate in terms of sentiment and 2) if they are coherent in terms of theme/plot. This is the method modeled by Elkins & Chun.
+
+Peak/plateau 1: 780, 890
+Valley 1: 2030
+Peak 2: 3200)
+Valley/plateau 2: 4450, 4600
+Peak end: 5110 (important to note that this is not the end of text, this cut off is an artifact of using the rolling mean)
+
+
+
