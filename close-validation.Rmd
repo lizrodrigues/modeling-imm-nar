@@ -9,7 +9,7 @@ This block gets up to having sentiment scores ready to plot:
 
 ```{r}
 library(syuzhet)
-antin_text <- get_text_as_string("Antin22.txt")
+antin_text <- get_text_as_string("corpus/Antin22.txt")
 antin_sentences <- get_sentences(antin_text)
 antin_no_gloss_sentences <- antin_sentences[1:5421]
 antin_no_gloss_sentence_scores_sy <- get_sentiment(antin_no_gloss_sentences, method="syuzhet")

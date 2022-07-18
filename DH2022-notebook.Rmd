@@ -23,7 +23,7 @@ library(syuzhet)
 - Load Antin text.
 
 ```{r}
-antin_text <- get_text_as_string("Antin22.txt")
+antin_text <- get_text_as_string("corpus/Antin22.txt")
 ```
 
 - Use Syuzhet's sentence parser to create a sentence vector. Length: 5695.
@@ -139,7 +139,7 @@ I thought I was going to do Steiner next, but the process of cleaning up the OCR
 Load Bok
 
 ```{r}
-bok_text <- get_text_as_string("bok22.txt")
+bok_text <- get_text_as_string("corpus/bok22.txt")
 ```
 
 Parse into sentences, get syuzhet scores, simple plot.
@@ -157,7 +157,7 @@ Let's speed this up and do the rest in single chunks.
 
 ### Riis
 ```{r}
-riis_text <- get_text_as_string("riis22.txt")
+riis_text <- get_text_as_string("corpus/riis22.txt")
 riis_sentences <- get_sentences(riis_text)
 riis_sentence_scores_sy <- get_sentiment(riis_sentences, method="syuzhet")
 riis_compare_sy_sent <- cbind(riis_sentences, riis_sentence_scores_sy)
@@ -168,7 +168,7 @@ simple_plot(riis_sentence_scores_sy, title = "Riis Syuzhet Lexicon Plot",
 ### Pupin
 
 ```{r}
-pupin_text <- get_text_as_string("pupin22.txt")
+pupin_text <- get_text_as_string("corpus/pupin22.txt")
 pupin_sentences <- get_sentences(pupin_text)
 pupin_sentence_scores_sy <- get_sentiment(pupin_sentences, method="syuzhet")
 pupin_compare_sy_sent <- cbind(pupin_sentences, pupin_sentence_scores_sy)
